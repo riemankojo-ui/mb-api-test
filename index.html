@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Multi Bundle API test</title>
+<style>
+  body{font-family:system-ui,sans-serif;background:#f3f2ee;margin:0;padding:16px;color:#111}
+  .card{background:#fff;border:1px solid #e3e1da;border-radius:16px;padding:16px;margin-bottom:14px}
+  h3{margin:0 0 6px}
+  p{font-size:12px;color:#666;margin:0 0 10px}
+  input{width:100%;box-sizing:border-box;border:1px solid #e3e1da;border-radius:10px;padding:10px;font-size:14px;margin-top:8px}
+  button{background:#1a1a1a;color:#fff;border:0;border-radius:12px;padding:12px 18px;font-size:15px;font-weight:600;margin-top:10px}
+  pre{background:#f0efeb;border-radius:10px;padding:10px;font-size:11px;white-space:pre-wrap;word-break:break-word;max-height:300px;overflow:auto;margin:10px 0 0}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h3>Your API key</h3>
+    <p>Paste them here each time. Nothing is saved.</p>
+    <input id="k" placeholder="API key (wkml_...)">
+    <input id="s" placeholder="Secret (mlsecret_...)">
+  </div>
+
+  <div class="card">
+    <h3>Test 1: Bundle</h3>
+    <p>Sends 2 small files and shows the bundled export.</p>
+    <button id="b1">Send files</button>
+    <pre id="o1">Result will show here.</pre>
+  </div>
+
+  <div class="card">
+    <h3>Test 2: Email</h3>
+    <p>Use the email address you signed up to Resend with.</p>
+    <input id="to" placeholder="your@email.com">
+    <button id="b2">Send test email</button>
+    <pre id="o2">Result will show here.</pre>
+  </div>
+
+<script>
+  var API = 'https://multibundle.vercel.app';
+  function hdr() {
+    return {
+      'Content-Type': 'application/json',
+      'x-api-key': document.getElementById('k').value.trim(),
+      'x-api-secret': document.getElementById('s').value.trim()
+    };
+  }
+  async function call(path, body, out) {
+    out.textContent = 'Sending...';
+    try {
+      var r = await fetch(API + path, { method: 'POST', headers: hdr(), body: JSON.stringify(body) });
+      var d = await r.json();
+      out.textContent = 'Status ' + r.status + '\n\n' + (d.bundle || JSON.stringify(d, null, 2));
+    } catch (e) {
+      out.textContent = 'Error: ' + e.message;
+    }
+  }
+  document.getElementById('b1').onclick = function () {
+    call('/api/bundle', {
+      name: 'Test project',
+      files: [
+        { path: 'index.html', content: '<h1>Hello</h1>' },
+        { path: 'style.css', content: 'h1{color:red}' }
+      ]
+    }, document.getElementById('o1'));
+  };
+  document.getElementById('b2').onclick = function () {
+    call('/api/email', {
+      to: document.getElementById('to').value.trim(),
+      subject: 'Test from my API',
+      html: '<p>It works!</p>'
+    }, document.getElementById('o2'));
+  };
+</script>
+</body>
+</html>

@@ -37,6 +37,14 @@
     <pre id="o2">Result will show here.</pre>
   </div>
 
+  <div class="card">
+    <h3>Test 3: My projects</h3>
+    <p>Lists the projects saved in your Multi Bundle account. Tap one to export it.</p>
+    <button id="b3">Load my projects</button>
+    <div id="plist"></div>
+    <pre id="o3">Result will show here.</pre>
+  </div>
+
 <script>
   var API = 'https://multibundle.vercel.app';
   function hdr() {
@@ -71,6 +79,25 @@
       subject: 'Test from my API',
       html: '<p>It works!</p>'
     }, document.getElementById('o2'));
+  };
+  document.getElementById('b3').onclick = async function () {
+    var out = document.getElementById('o3');
+    var list = document.getElementById('plist');
+    list.textContent = '';
+    out.textContent = 'Loading...';
+    try {
+      var r = await fetch(API + '/api/projects', { method: 'POST', headers: hdr(), body: JSON.stringify({}) });
+      var d = await r.json();
+      if (!r.ok) { out.textContent = 'Status ' + r.status + '\n\n' + JSON.stringify(d, null, 2); return; }
+      out.textContent = d.count + ' project(s) found. Tap one to export.';
+      d.projects.forEach(function (p) {
+        var btn = document.createElement('button');
+        btn.style.cssText = 'display:block;width:100%;text-align:left;background:#f0efeb;color:#111;font-size:13px;font-weight:500;margin-top:8px';
+        btn.textContent = (p.name || p.id) + '  (' + p.files + ' files)';
+        btn.onclick = function () { call('/api/projects', { id: p.id }, out); };
+        list.appendChild(btn);
+      });
+    } catch (e) { out.textContent = 'Error: ' + e.message; }
   };
 </script>
 </body>

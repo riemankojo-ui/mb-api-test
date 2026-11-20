@@ -45,6 +45,22 @@
     <pre id="o3">Result will show here.</pre>
   </div>
 
+  <div class="card">
+    <h3>Test 4: Publish a file</h3>
+    <p>Adds a small test file to the repo. The key must allow it for this repo.</p>
+    <input id="repo" placeholder="owner/name (e.g. yourname/mb-api-test)">
+    <button id="b4">Publish test file</button>
+    <pre id="o4">Result will show here.</pre>
+  </div>
+
+  <div class="card">
+    <h3>Test 5: Create workflow</h3>
+    <p>Adds the APK build workflow to the repo above.</p>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-top:8px"><input type="checkbox" id="runit" style="width:auto;margin:0"> Also start a build</label>
+    <button id="b5">Create workflow</button>
+    <pre id="o5">Result will show here.</pre>
+  </div>
+
 <script>
   var API = 'https://multibundle.vercel.app';
   function hdr() {
@@ -98,6 +114,23 @@
         list.appendChild(btn);
       });
     } catch (e) { out.textContent = 'Error: ' + e.message; }
+  };
+  document.getElementById('b4').onclick = function () {
+    call('/api/publish', {
+      repo: document.getElementById('repo').value.trim(),
+      message: 'Test from Multi Bundle API',
+      files: [{ path: 'api-test.txt', content: 'Hello from the Multi Bundle API\n' + new Date().toISOString() }]
+    }, document.getElementById('o4'));
+  };
+  document.getElementById('b5').onclick = function () {
+    call('/api/workflow', {
+      repo: document.getElementById('repo').value.trim(),
+      template: 'apk',
+      app_name: 'API Test',
+      app_id: 'com.test.apitest',
+      version: '1.0.0',
+      run: document.getElementById('runit').checked
+    }, document.getElementById('o5'));
   };
 </script>
 </body>
